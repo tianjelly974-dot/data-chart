@@ -1,727 +1,620 @@
+# 完整版 index.html
+
+> 直接复制下面全部代码，保存为 `index.html` 即可运行。
+> 如果地图不显示，请确保联网（因为用了 ECharts CDN 和中国地图 JSON）。
+
+```html
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-<title>中国区域发展数据可视化报告</title>
+<title>中国区域发展数据可视化平台</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 
 <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+<script src="https://fastly.jsdelivr.net/npm/echarts@5/map/js/china.js"></script>
 
 <style>
 *{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-}
-
-html{
-    scroll-behavior:smooth;
+margin:0;
+padding:0;
+box-sizing:border-box;
 }
 
 body{
-    font-family:"Noto Sans SC",sans-serif;
-    background:#07111f;
-    color:white;
-    overflow-x:hidden;
+font-family:'Noto Sans SC',sans-serif;
+background:#060b16;
+color:white;
+overflow-x:hidden;
 }
 
-/* 背景 */
 body::before{
-    content:"";
-    position:fixed;
-    inset:0;
-    background:
-    radial-gradient(circle at 20% 20%,rgba(0,255,200,.08),transparent 30%),
-    radial-gradient(circle at 80% 30%,rgba(0,150,255,.08),transparent 30%),
-    radial-gradient(circle at 50% 80%,rgba(255,120,0,.06),transparent 30%);
-    z-index:-2;
+content:'';
+position:fixed;
+inset:0;
+background:
+radial-gradient(circle at 20% 20%,rgba(255,170,0,.15),transparent 25%),
+radial-gradient(circle at 80% 30%,rgba(0,180,255,.15),transparent 25%),
+radial-gradient(circle at 60% 80%,rgba(180,0,255,.12),transparent 25%);
+pointer-events:none;
+z-index:-2;
 }
 
 body::after{
-    content:"";
-    position:fixed;
-    inset:0;
-    background-image:
-    linear-gradient(rgba(255,255,255,.02) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,.02) 1px, transparent 1px);
-    background-size:40px 40px;
-    z-index:-1;
+content:'';
+position:fixed;
+inset:0;
+background-image:
+linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px),
+linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px);
+background-size:50px 50px;
+pointer-events:none;
+z-index:-1;
 }
 
-/* 顶部导航 */
-nav{
-    position:fixed;
-    top:0;
-    left:0;
-    width:100%;
-    height:70px;
-    background:rgba(5,10,20,.75);
-    backdrop-filter:blur(10px);
-    border-bottom:1px solid rgba(255,255,255,.08);
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    padding:0 50px;
-    z-index:999;
-}
-
-.logo{
-    font-size:22px;
-    font-weight:900;
-    background:linear-gradient(90deg,#00f0ff,#00ffa2);
-    -webkit-background-clip:text;
-    -webkit-text-fill-color:transparent;
-}
-
-.nav-links{
-    display:flex;
-    gap:30px;
-}
-
-.nav-links a{
-    color:#aaa;
-    text-decoration:none;
-    transition:.3s;
-}
-
-.nav-links a:hover{
-    color:white;
-}
-
-/* hero */
 .hero{
-    height:100vh;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    flex-direction:column;
-    text-align:center;
-    position:relative;
+height:100vh;
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+text-align:center;
+padding:20px;
 }
 
 .hero h1{
-    font-size:72px;
-    font-weight:900;
-    line-height:1.1;
-    margin-bottom:20px;
-    background:linear-gradient(90deg,#00f0ff,#00ffa2,#ffd000);
-    -webkit-background-clip:text;
-    -webkit-text-fill-color:transparent;
+font-size:72px;
+font-weight:900;
+background:linear-gradient(90deg,#ffcc00,#00c3ff);
+-webkit-background-clip:text;
+-webkit-text-fill-color:transparent;
+margin-bottom:20px;
 }
 
 .hero p{
-    color:#9fb3c8;
-    width:70%;
-    line-height:1.8;
-    font-size:18px;
+font-size:20px;
+color:#c8d2ff;
+max-width:900px;
+line-height:1.8;
 }
 
-/* 数据卡片 */
-.stats{
-    margin-top:60px;
-    display:flex;
-    gap:25px;
-    flex-wrap:wrap;
-    justify-content:center;
+.scroll-tip{
+margin-top:50px;
+animation:float 2s infinite;
+font-size:14px;
+letter-spacing:3px;
+color:#8fa3ff;
 }
 
-.card{
-    width:220px;
-    background:rgba(255,255,255,.05);
-    border:1px solid rgba(255,255,255,.08);
-    border-radius:20px;
-    padding:28px;
-    backdrop-filter:blur(10px);
-    transition:.4s;
+@keyframes float{
+0%{transform:translateY(0)}
+50%{transform:translateY(10px)}
+100%{transform:translateY(0)}
 }
 
-.card:hover{
-    transform:translateY(-8px);
-    border-color:#00f0ff;
-}
-
-.card h2{
-    font-size:42px;
-    margin-top:10px;
-    color:#00f0ff;
-}
-
-.card p{
-    width:100%;
-    font-size:14px;
-    color:#89a1b7;
-}
-
-/* section */
 .section{
-    padding:120px 7%;
+padding:80px 5vw;
 }
 
 .section-title{
-    margin-bottom:50px;
+font-size:42px;
+margin-bottom:12px;
+font-weight:800;
 }
 
-.section-title h2{
-    font-size:42px;
-    margin-bottom:10px;
+.section-sub{
+color:#9aa8d8;
+margin-bottom:40px;
+line-height:1.8;
 }
 
-.section-title p{
-    color:#89a1b7;
-}
-
-.chart-box{
-    width:100%;
-    height:700px;
-    background:rgba(255,255,255,.04);
-    border:1px solid rgba(255,255,255,.08);
-    border-radius:24px;
-    padding:20px;
-    backdrop-filter:blur(10px);
-}
-
-/* 雷达图区域 */
 .grid{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:30px;
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
+gap:24px;
 }
 
-.small-chart{
-    height:500px;
-    background:rgba(255,255,255,.04);
-    border-radius:24px;
-    border:1px solid rgba(255,255,255,.08);
-    padding:20px;
+.card{
+background:rgba(12,18,35,.78);
+border:1px solid rgba(255,255,255,.08);
+border-radius:24px;
+padding:25px;
+backdrop-filter:blur(18px);
+box-shadow:0 10px 40px rgba(0,0,0,.45);
 }
 
-/* footer */
-footer{
-    padding:60px;
-    text-align:center;
-    color:#7b8da0;
-    border-top:1px solid rgba(255,255,255,.08);
-    margin-top:100px;
+.chart{
+width:100%;
+height:520px;
 }
 
-@media(max-width:900px){
+#raceChart{
+height:700px;
+}
 
-    .hero h1{
-        font-size:42px;
-    }
+.stats{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+gap:24px;
+margin-top:-120px;
+padding:0 5vw 60px;
+position:relative;
+z-index:10;
+}
 
-    .hero p{
-        width:90%;
-    }
+.stat-box{
+background:rgba(10,18,30,.85);
+border:1px solid rgba(255,255,255,.08);
+border-radius:24px;
+padding:28px;
+backdrop-filter:blur(16px);
+}
 
-    .grid{
-        grid-template-columns:1fr;
-    }
+.stat-label{
+font-size:14px;
+letter-spacing:2px;
+color:#93a1d6;
+margin-bottom:14px;
+}
 
-    nav{
-        padding:0 20px;
-    }
+.stat-value{
+font-size:42px;
+font-weight:900;
+background:linear-gradient(90deg,#ffcc00,#00c3ff);
+-webkit-background-clip:text;
+-webkit-text-fill-color:transparent;
+}
 
-    .nav-links{
-        display:none;
-    }
+.footer{
+padding:50px 20px;
+text-align:center;
+color:#8090c2;
+font-size:14px;
+}
+
+@media(max-width:768px){
+.hero h1{
+font-size:42px;
+}
+
+.section-title{
+font-size:30px;
+}
+
+.chart{
+height:420px;
+}
 }
 </style>
 </head>
-
 <body>
 
-<!-- 导航 -->
-<nav>
-    <div class="logo">DATA · CHINA</div>
-
-    <div class="nav-links">
-        <a href="#race">动态排名</a>
-        <a href="#trend">趋势分析</a>
-        <a href="#radar">区域雷达</a>
-        <a href="#stack">结构分析</a>
-    </div>
-</nav>
-
-<!-- 首页封面 -->
 <section class="hero">
-
-    <h1>
-        中国区域发展<br>
-        数据可视化报告
-    </h1>
-
-    <p>
-        2006—2024 年全国 31 个省份数据趋势分析，通过动态排名、趋势曲线、
-        雷达图、区域结构图等多种交互可视化形式，
-        展示中国区域发展变化与空间格局。
-    </p>
-
-    <div class="stats">
-
-        <div class="card">
-            <p>覆盖地区</p>
-            <h2>31</h2>
-        </div>
-
-        <div class="card">
-            <p>时间跨度</p>
-            <h2>19年</h2>
-        </div>
-
-        <div class="card">
-            <p>最高省份</p>
-            <h2>河南</h2>
-        </div>
-
-        <div class="card">
-            <p>最高数值</p>
-            <h2>39.61</h2>
-        </div>
-
-    </div>
-
+<h1>中国区域发展数据平台</h1>
+<p>
+基于 2006—2024 年全国 31 个省级行政区数据构建的交互式数据新闻可视化平台。
+融合中国地图、动态 Race Bar、趋势分析、雷达图与热力矩阵等多种可视化方式。
+</p>
+<div class="scroll-tip">SCROLL DOWN</div>
 </section>
 
-<!-- 动态排名 -->
-<section class="section" id="race">
+<div class="stats">
+<div class="stat-box">
+<div class="stat-label">覆盖地区</div>
+<div class="stat-value">31</div>
+</div>
 
-    <div class="section-title">
-        <h2>动态 Race Bar 排名</h2>
-        <p>2006—2024 各地区数值变化动态演化</p>
-    </div>
+<div class="stat-box">
+<div class="stat-label">时间跨度</div>
+<div class="stat-value">19年</div>
+</div>
 
-    <div class="chart-box" id="raceChart"></div>
+<div class="stat-box">
+<div class="stat-label">最高地区</div>
+<div class="stat-value">河南</div>
+</div>
 
+<div class="stat-box">
+<div class="stat-label">可视化模块</div>
+<div class="stat-value">6+</div>
+</div>
+</div>
+
+<section class="section">
+<h2 class="section-title">中国区域热力地图</h2>
+<p class="section-sub">
+通过地图呈现各地区数据分布情况，颜色越亮代表数值越高。
+</p>
+
+<div class="card">
+<div id="chinaMap" class="chart"></div>
+</div>
 </section>
 
-<!-- 趋势图 -->
-<section class="section" id="trend">
+<section class="section">
+<h2 class="section-title">Race Bar 动态排名</h2>
+<p class="section-sub">
+展示不同年份下各地区数据排名变化。
+</p>
 
-    <div class="section-title">
-        <h2>区域趋势分析</h2>
-        <p>重点地区长期变化趋势</p>
-    </div>
-
-    <div class="chart-box" id="lineChart"></div>
-
+<div class="card">
+<div id="raceChart"></div>
+</div>
 </section>
 
-<!-- 雷达图 -->
-<section class="section" id="radar">
+<section class="section">
+<h2 class="section-title">区域趋势分析</h2>
+<p class="section-sub">
+观察不同地区在 2006—2024 年期间的发展趋势变化。
+</p>
 
-    <div class="section-title">
-        <h2>区域能力雷达图</h2>
-        <p>五维综合对比分析</p>
-    </div>
-
-    <div class="grid">
-
-        <div class="small-chart" id="radarChart"></div>
-
-        <div class="small-chart" id="pieChart"></div>
-
-    </div>
-
+<div class="card">
+<div id="lineChart" class="chart"></div>
+</div>
 </section>
 
-<!-- 堆叠图 -->
-<section class="section" id="stack">
+<section class="section">
+<h2 class="section-title">区域能力雷达图</h2>
+<p class="section-sub">
+对重点地区多个时间维度进行综合比较。
+</p>
 
-    <div class="section-title">
-        <h2>区域结构演化</h2>
-        <p>全国区域占比变化趋势</p>
-    </div>
-
-    <div class="chart-box" id="stackChart"></div>
-
+<div class="card">
+<div id="radarChart" class="chart"></div>
+</div>
 </section>
 
-<footer>
-    中国区域发展数据可视化平台 · ECharts 数据新闻网页
-</footer>
+<section class="section">
+<h2 class="section-title">区域占比结构</h2>
+<p class="section-sub">
+展示主要地区整体数据结构占比。
+</p>
+
+<div class="grid">
+<div class="card">
+<div id="pieChart" class="chart"></div>
+</div>
+
+<div class="card">
+<div id="barChart" class="chart"></div>
+</div>
+</div>
+</section>
+
+<section class="section">
+<h2 class="section-title">热力矩阵分析</h2>
+<p class="section-sub">
+通过矩阵热力图分析全国区域数据变化趋势。
+</p>
+
+<div class="card">
+<div id="heatmapChart" class="chart"></div>
+</div>
+</section>
+
+<div class="footer">
+中国区域发展数据可视化平台 · Data Visualization Dashboard · ECharts Interactive Project
+</div>
 
 <script>
+const years=[2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024];
 
-/* 数据 */
-const years = [
-2006,2007,2008,2009,2010,2011,
-2012,2013,2014,2015,2016,2017,
-2018,2019,2020,2021,2022,2023,2024
-];
-
-const data = {
-"河南":[9.95,11.5,13.08,13.86,15.5,17.03,26.08,20.96,22.59,24.87,25.94,26.76,28.33,30.84,31.14,34.65,35.43,37.98,39.61],
-"广东":[9.43,12.36,13.93,15.85,16.85,18.71,21.92,21.79,23.26,24.4,25.75,26.76,28.07,28.53,29.43,32.9,34.23,36.45,37.88],
-"山东":[16.87,17.32,18.2,18.54,18.21,20.87,26.74,21.89,23.24,24.27,25.22,24.81,25.43,28.29,28.63,30.69,32.89,33.65,34.73],
-"江苏":[15.46,17.16,19.38,20.66,23.25,23.94,24.11,25.21,25.64,25.55,26.46,27.38,28.03,29.21,29.29,31.24,31.74,32.35,33.49],
-"四川":[11.19,11.58,13.02,13.09,14.38,16.06,15.71,18.11,18.36,19.25,19.46,19.67,21.84,23.23,23.93,26.77,28.08,29.71,30.9],
-"北京":[10.3,10.88,11.64,11.5,11.6,11.82,3.79,12.01,12.25,12.54,12.75,12.78,12.87,13.07,13.08,13.72,14.14,14.27,14.34]
+const data={
+'北京市':[10.3,10.88,11.64,11.5,11.6,11.82,3.79,12.01,12.25,12.54,12.75,12.78,12.87,13.07,13.08,13.72,14.14,14.27,14.34],
+'天津市':[4.6,5.27,5.59,5.83,6.01,6.49,5.46,7.65,7.93,8.4,8.34,8.33,8.43,8.82,8.92,9.56,9.53,9.7,9.56],
+'河北省':[8.92,10.46,10.16,10.96,12.25,13.54,18.83,15.56,16.16,16.7,17.33,17.55,17.98,19.54,20.32,22.85,24.62,25.61,25.68],
+'山西省':[4.9,5.38,5.86,6.05,6.52,7.25,9.75,8.52,9.19,10.22,11.41,11.86,12.29,13.03,13.45,13.69,13.96,14.69,14.73],
+'辽宁省':[10.09,11.54,13,13.76,14.52,15.16,9.59,15.77,16.75,17.38,18.32,18.73,17.53,17.54,17.39,18.38,18.87,19.82,20.19],
+'上海市':[6.52,7.24,7.69,8.45,8.87,9.09,5.13,9.12,9.3,9.5,9.65,9.49,9.51,10.03,10.23,10.59,10.57,11.05,11.05],
+'江苏省':[15.46,17.16,19.38,20.66,23.25,23.94,24.11,25.21,25.64,25.55,26.46,27.38,28.03,29.21,29.29,31.24,31.74,32.35,33.49],
+'浙江省':[8.32,9.46,10.34,11.32,12.14,13.07,11.89,13.98,14.61,15.26,15.39,15.79,16.1,16.03,16.63,17.88,18.31,19.23,19.38],
+'山东省':[16.87,17.32,18.2,18.54,18.21,20.87,26.74,21.89,23.24,24.27,25.22,24.81,25.43,28.29,28.63,30.69,32.89,33.65,34.73],
+'河南省':[9.95,11.5,13.08,13.86,15.5,17.03,26.08,20.96,22.59,24.87,25.94,26.76,28.33,30.84,31.14,34.65,35.43,37.98,39.61],
+'湖北省':[11.74,14.9,15.21,15.16,15.89,17.01,18.3,20.1,21.45,22.27,21.99,21.17,21.57,22.31,22.7,25.3,26.18,26.94,27.45],
+'湖南省':[9.02,9.72,10.83,11.09,12.2,13.42,15.45,15.54,15.8,16.72,16.85,16.97,17.28,17.92,18.49,19.92,20.97,21.98,22.6],
+'广东省':[9.43,12.36,13.93,15.85,16.85,18.71,21.92,21.79,23.26,24.4,25.75,26.76,28.07,28.53,29.43,32.9,34.23,36.45,37.88],
+'四川省':[11.19,11.58,13.02,13.09,14.38,16.06,15.71,18.11,18.36,19.25,19.46,19.67,21.84,23.23,23.93,26.77,28.08,29.71,30.9]
 };
 
-/* =========================
-   动态排名图
-========================= */
+const mapChart=echarts.init(document.getElementById('chinaMap'));
+const mapData=[];
 
-const raceChart = echarts.init(document.getElementById("raceChart"));
+for(let k in data){
+mapData.push({
+name:k.replace('省','').replace('市',''),
+value:data[k][18]
+});
+}
 
-let yearIndex = 0;
+mapChart.setOption({
+backgroundColor:'transparent',
+tooltip:{trigger:'item'},
+visualMap:{
+min:0,
+max:40,
+text:['高','低'],
+realtime:true,
+calculable:true,
+inRange:{
+color:['#0d1b4d','#0066ff','#00c3ff','#ffe066','#ff8c00']
+},
+textStyle:{color:'#fff'}
+},
+series:[{
+type:'map',
+map:'china',
+roam:true,
+zoom:1.15,
+label:{show:false,color:'#fff'},
+itemStyle:{
+borderColor:'#5f8cff',
+areaColor:'#111d36'
+},
+emphasis:{
+label:{show:true,color:'#fff'},
+itemStyle:{areaColor:'#ffb703'}
+},
+data:mapData
+}]
+});
+
+const lineChart=echarts.init(document.getElementById('lineChart'));
+
+lineChart.setOption({
+backgroundColor:'transparent',
+legend:{textStyle:{color:'#fff'}},
+tooltip:{trigger:'axis'},
+xAxis:{
+type:'category',
+data:years,
+axisLabel:{color:'#9fb2ff'}
+},
+yAxis:{
+type:'value',
+axisLabel:{color:'#9fb2ff'}
+},
+series:[
+{
+name:'河南省',
+type:'line',
+smooth:true,
+data:data['河南省']
+},
+{
+name:'广东省',
+type:'line',
+smooth:true,
+data:data['广东省']
+},
+{
+name:'江苏省',
+type:'line',
+smooth:true,
+data:data['江苏省']
+},
+{
+name:'山东省',
+type:'line',
+smooth:true,
+data:data['山东省']
+}
+]
+});
+
+const radarChart=echarts.init(document.getElementById('radarChart'));
+
+radarChart.setOption({
+backgroundColor:'transparent',
+legend:{textStyle:{color:'#fff'}},
+rader:{},
+radar:{
+indicator:[
+{name:'2006',max:40},
+{name:'2010',max:40},
+{name:'2014',max:40},
+{name:'2018',max:40},
+{name:'2024',max:40}
+],
+axisName:{color:'#fff'}
+},
+series:[{
+type:'radar',
+data:[
+{
+value:[9.95,15.5,22.59,28.33,39.61],
+name:'河南省'
+},
+{
+value:[9.43,16.85,23.26,28.07,37.88],
+name:'广东省'
+}
+]
+}]
+});
+
+const pieChart=echarts.init(document.getElementById('pieChart'));
+
+pieChart.setOption({
+backgroundColor:'transparent',
+tooltip:{trigger:'item'},
+legend:{bottom:0,textStyle:{color:'#fff'}},
+series:[{
+type:'pie',
+radius:['45%','75%'],
+data:[
+{name:'河南',value:39.61},
+{name:'广东',value:37.88},
+{name:'山东',value:34.73},
+{name:'江苏',value:33.49},
+{name:'四川',value:30.9}
+],
+label:{color:'#fff'}
+}]
+});
+
+const barChart=echarts.init(document.getElementById('barChart'));
+
+barChart.setOption({
+backgroundColor:'transparent',
+tooltip:{trigger:'axis'},
+xAxis:{
+type:'category',
+data:['河南','广东','山东','江苏','四川'],
+axisLabel:{color:'#fff'}
+},
+yAxis:{
+type:'value',
+axisLabel:{color:'#fff'}
+},
+series:[{
+type:'bar',
+barWidth:'55%',
+data:[39.61,37.88,34.73,33.49,30.9],
+itemStyle:{
+color:new echarts.graphic.LinearGradient(0,0,0,1,[
+{offset:0,color:'#00c3ff'},
+{offset:1,color:'#0066ff'}
+]),
+borderRadius:[12,12,0,0]
+}
+}]
+});
+
+const heatmapChart=echarts.init(document.getElementById('heatmapChart'));
+
+const heatData=[];
+const regions=Object.keys(data);
+
+regions.forEach((r,y)=>{
+data[r].forEach((v,x)=>{
+heatData.push([x,y,v]);
+});
+});
+
+heatmapChart.setOption({
+backgroundColor:'transparent',
+tooltip:{position:'top'},
+grid:{height:'70%',top:'10%'},
+xAxis:{
+type:'category',
+data:years,
+splitArea:{show:true},
+axisLabel:{color:'#fff'}
+},
+yAxis:{
+type:'category',
+data:regions,
+splitArea:{show:true},
+axisLabel:{color:'#fff'}
+},
+visualMap:{
+min:0,
+max:40,
+calculable:true,
+orient:'horizontal',
+left:'center',
+bottom:'2%',
+textStyle:{color:'#fff'}
+},
+series:[{
+name:'数据',
+type:'heatmap',
+data:heatData,
+label:{show:false},
+emphasis:{
+itemStyle:{
+shadowBlur:10,
+shadowColor:'rgba(0,0,0,.5)'
+}
+}
+}]
+});
+
+const raceChart=echarts.init(document.getElementById('raceChart'));
+
+let yearIndex=0;
 
 function updateRace(){
+const currentYear=years[yearIndex];
 
-    const year = years[yearIndex];
+let arr=[];
+for(let k in data){
+arr.push({
+name:k.replace('省','').replace('市',''),
+value:data[k][yearIndex]
+});
+}
 
-    let arr = [];
+arr.sort((a,b)=>b.value-a.value);
+arr=arr.slice(0,10);
 
-    for(let key in data){
-        arr.push({
-            name:key,
-            value:data[key][yearIndex]
-        });
-    }
+raceChart.setOption({
+backgroundColor:'transparent',
+title:{
+text:currentYear+' 年',
+right:30,
+top:20,
+textStyle:{
+fontSize:42,
+color:'rgba(255,255,255,.15)',
+fontWeight:'900'
+}
+},
+grid:{left:120,right:40,top:100,bottom:40},
+xAxis:{
+max:45,
+axisLabel:{color:'#fff'}
+},
+yAxis:{
+type:'category',
+inverse:true,
+data:arr.map(i=>i.name),
+axisLabel:{color:'#fff',fontSize:16},
+animationDuration:300,
+animationDurationUpdate:300
+},
+series:[{
+realtimeSort:true,
+type:'bar',
+data:arr.map(i=>i.value),
+label:{
+show:true,
+position:'right',
+color:'#fff'
+},
+itemStyle:{
+color:new echarts.graphic.LinearGradient(1,0,0,0,[
+{offset:0,color:'#00c3ff'},
+{offset:1,color:'#ffcc00'}
+]),
+borderRadius:[0,20,20,0]
+}
+}]
+});
 
-    arr.sort((a,b)=>a.value-b.value);
-
-    raceChart.setOption({
-
-        backgroundColor:"transparent",
-
-        title:{
-            text:year + " 年",
-            right:40,
-            top:20,
-            textStyle:{
-                color:"#ffffff22",
-                fontSize:70,
-                fontWeight:"900"
-            }
-        },
-
-        grid:{
-            left:120,
-            right:80,
-            top:80,
-            bottom:40
-        },
-
-        xAxis:{
-            max:45,
-            splitLine:{
-                lineStyle:{
-                    color:"rgba(255,255,255,.06)"
-                }
-            },
-            axisLabel:{
-                color:"#8ca3b8"
-            }
-        },
-
-        yAxis:{
-            type:"category",
-            inverse:true,
-            data:arr.map(i=>i.name),
-            axisLabel:{
-                color:"#fff",
-                fontSize:16
-            },
-            axisLine:{show:false},
-            axisTick:{show:false}
-        },
-
-        series:[{
-            type:"bar",
-            realtimeSort:true,
-            data:arr,
-            barWidth:28,
-            label:{
-                show:true,
-                position:"right",
-                color:"#fff"
-            },
-            itemStyle:{
-                borderRadius:[0,20,20,0],
-                color:new echarts.graphic.LinearGradient(1,0,0,0,[
-                    {offset:0,color:"#00f0ff"},
-                    {offset:1,color:"#00ffa2"}
-                ])
-            }
-        }],
-
-        animationDuration:1000,
-        animationDurationUpdate:1000
-    });
-
-    yearIndex++;
-
-    if(yearIndex >= years.length){
-        yearIndex = 0;
-    }
+yearIndex++;
+if(yearIndex>=years.length){
+yearIndex=0;
+}
 }
 
 updateRace();
-
 setInterval(updateRace,1800);
 
-/* =========================
-   趋势图
-========================= */
-
-const lineChart = echarts.init(document.getElementById("lineChart"));
-
-lineChart.setOption({
-
-    tooltip:{
-        trigger:"axis"
-    },
-
-    legend:{
-        textStyle:{
-            color:"#fff"
-        },
-        top:20
-    },
-
-    grid:{
-        left:60,
-        right:40,
-        top:80,
-        bottom:50
-    },
-
-    xAxis:{
-        type:"category",
-        data:years,
-        axisLabel:{
-            color:"#8ca3b8"
-        }
-    },
-
-    yAxis:{
-        type:"value",
-        axisLabel:{
-            color:"#8ca3b8"
-        },
-        splitLine:{
-            lineStyle:{
-                color:"rgba(255,255,255,.06)"
-            }
-        }
-    },
-
-    series:[
-        {
-            name:"河南",
-            type:"line",
-            smooth:true,
-            data:data["河南"]
-        },
-        {
-            name:"广东",
-            type:"line",
-            smooth:true,
-            data:data["广东"]
-        },
-        {
-            name:"山东",
-            type:"line",
-            smooth:true,
-            data:data["山东"]
-        },
-        {
-            name:"江苏",
-            type:"line",
-            smooth:true,
-            data:data["江苏"]
-        }
-    ]
+window.addEventListener('resize',()=>{
+mapChart.resize();
+lineChart.resize();
+radarChart.resize();
+pieChart.resize();
+barChart.resize();
+heatmapChart.resize();
+raceChart.resize();
 });
-
-/* =========================
-   雷达图
-========================= */
-
-const radarChart = echarts.init(document.getElementById("radarChart"));
-
-radarChart.setOption({
-
-    tooltip:{},
-
-    legend:{
-        top:20,
-        textStyle:{
-            color:"#fff"
-        }
-    },
-
-    radar:{
-        indicator:[
-            {name:"增长速度",max:40},
-            {name:"发展规模",max:40},
-            {name:"稳定性",max:40},
-            {name:"区域潜力",max:40},
-            {name:"综合水平",max:40}
-        ],
-        splitArea:{
-            areaStyle:{
-                color:[
-                    "rgba(255,255,255,.01)",
-                    "rgba(255,255,255,.03)"
-                ]
-            }
-        },
-        axisName:{
-            color:"#fff"
-        }
-    },
-
-    series:[{
-        type:"radar",
-        data:[
-            {
-                value:[39,35,32,38,37],
-                name:"河南"
-            },
-            {
-                value:[37,39,36,35,38],
-                name:"广东"
-            }
-        ]
-    }]
-});
-
-/* =========================
-   饼图
-========================= */
-
-const pieChart = echarts.init(document.getElementById("pieChart"));
-
-pieChart.setOption({
-
-    tooltip:{
-        trigger:"item"
-    },
-
-    legend:{
-        bottom:20,
-        textStyle:{
-            color:"#fff"
-        }
-    },
-
-    series:[
-        {
-            type:"pie",
-            radius:["40%","70%"],
-            data:[
-                {value:39.61,name:"河南"},
-                {value:37.88,name:"广东"},
-                {value:34.73,name:"山东"},
-                {value:33.49,name:"江苏"},
-                {value:30.90,name:"四川"}
-            ]
-        }
-    ]
-});
-
-/* =========================
-   堆叠面积图
-========================= */
-
-const stackChart = echarts.init(document.getElementById("stackChart"));
-
-stackChart.setOption({
-
-    tooltip:{
-        trigger:"axis"
-    },
-
-    legend:{
-        top:20,
-        textStyle:{
-            color:"#fff"
-        }
-    },
-
-    grid:{
-        left:60,
-        right:40,
-        top:80,
-        bottom:50
-    },
-
-    xAxis:{
-        type:"category",
-        boundaryGap:false,
-        data:years,
-        axisLabel:{
-            color:"#8ca3b8"
-        }
-    },
-
-    yAxis:{
-        type:"value",
-        axisLabel:{
-            color:"#8ca3b8"
-        },
-        splitLine:{
-            lineStyle:{
-                color:"rgba(255,255,255,.06)"
-            }
-        }
-    },
-
-    series:[
-        {
-            name:"河南",
-            type:"line",
-            stack:"总量",
-            areaStyle:{},
-            smooth:true,
-            data:data["河南"]
-        },
-        {
-            name:"广东",
-            type:"line",
-            stack:"总量",
-            areaStyle:{},
-            smooth:true,
-            data:data["广东"]
-        },
-        {
-            name:"山东",
-            type:"line",
-            stack:"总量",
-            areaStyle:{},
-            smooth:true,
-            data:data["山东"]
-        },
-        {
-            name:"江苏",
-            type:"line",
-            stack:"总量",
-            areaStyle:{},
-            smooth:true,
-            data:data["江苏"]
-        }
-    ]
-});
-
-/* 自适应 */
-window.addEventListener("resize",()=>{
-
-    raceChart.resize();
-    lineChart.resize();
-    radarChart.resize();
-    pieChart.resize();
-    stackChart.resize();
-
-});
-
 </script>
 
 </body>
 </html>
+```
