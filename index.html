@@ -1,24 +1,795 @@
-- Nav (sticky, appears on scroll)
-- Hero Section (full screen cover)
-  - Animated orbs background
-  - Title, subtitle
-  - Key stats (animated counters)
-  - Scroll indicator
-- Section 1: Race Bar Chart
-  - Play/pause controls
-  - Year slider
-  - Animated horizontal bars
-- Section 2: Trend Line Chart
- - Region pill selectors
-  - Preset buttons
-  - Chart.js line chart
-- Section 3: Radar Chart
-  - Region selectors (max 6)
-  - 5 time dimension axes
-- Section 4: Stacked Area / Distribution - Showing regional composition
-- Section 5: Growth Cards Grid
-  - Sort by value/growth/name
-  - Visual bars- Section 6: Heatmap Visualization
-  - Using canvas or colored divs
-  - Not a table!
-- Footer
+```html
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+<title>中国区域发展数据可视化报告</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+
+<script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+html{
+    scroll-behavior:smooth;
+}
+
+body{
+    font-family:'Noto Sans SC',sans-serif;
+    background:#070b14;
+    color:#fff;
+    overflow-x:hidden;
+}
+
+/* ===== 背景 ===== */
+
+.bg-grid{
+    position:fixed;
+    inset:0;
+    background-image:
+    linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+    background-size:40px 40px;
+    z-index:-2;
+}
+
+.glow{
+    position:fixed;
+    width:700px;
+    height:700px;
+    border-radius:50%;
+    filter:blur(140px);
+    opacity:.15;
+    z-index:-1;
+}
+
+.glow1{
+    background:#f0b429;
+    top:-200px;
+    left:-100px;
+}
+
+.glow2{
+    background:#2196f3;
+    bottom:-200px;
+    right:-100px;
+}
+
+/* ===== Hero ===== */
+
+.hero{
+    height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    position:relative;
+    padding:0 20px;
+}
+
+.hero-content{
+    max-width:900px;
+}
+
+.hero-tag{
+    display:inline-block;
+    padding:8px 18px;
+    border:1px solid rgba(255,255,255,.1);
+    border-radius:30px;
+    background:rgba(255,255,255,.04);
+    backdrop-filter:blur(10px);
+    color:#f0b429;
+    margin-bottom:30px;
+    letter-spacing:2px;
+    font-size:14px;
+}
+
+.hero h1{
+    font-size:72px;
+    line-height:1.1;
+    font-weight:900;
+    margin-bottom:30px;
+    background:linear-gradient(to right,#fff,#f0b429);
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+}
+
+.hero p{
+    color:#9aa4bf;
+    line-height:1.8;
+    font-size:20px;
+    max-width:700px;
+    margin:auto;
+}
+
+.hero-number{
+    margin-top:50px;
+}
+
+.hero-number span{
+    font-size:100px;
+    font-weight:900;
+    color:#f0b429;
+}
+
+.hero-number small{
+    display:block;
+    color:#9aa4bf;
+    margin-top:10px;
+}
+
+.enter-btn{
+    margin-top:50px;
+    padding:16px 42px;
+    background:linear-gradient(135deg,#f0b429,#ff9800);
+    border:none;
+    border-radius:50px;
+    color:#000;
+    font-size:18px;
+    font-weight:700;
+    cursor:pointer;
+    transition:.3s;
+}
+
+.enter-btn:hover{
+    transform:translateY(-4px);
+    box-shadow:0 20px 50px rgba(240,180,41,.3);
+}
+
+.scroll-tip{
+    position:absolute;
+    bottom:40px;
+    left:50%;
+    transform:translateX(-50%);
+    color:#9aa4bf;
+    font-size:14px;
+    letter-spacing:3px;
+    animation:float 2s infinite;
+}
+
+@keyframes float{
+    0%{transform:translate(-50%,0);}
+    50%{transform:translate(-50%,10px);}
+    100%{transform:translate(-50%,0);}
+}
+
+/* ===== section ===== */
+
+section{
+    padding:120px 8%;
+}
+
+.section-title{
+    margin-bottom:60px;
+}
+
+.section-title h2{
+    font-size:52px;
+    margin-bottom:16px;
+}
+
+.section-title p{
+    color:#94a0be;
+    line-height:1.8;
+    max-width:800px;
+}
+
+/* ===== 卡片 ===== */
+
+.glass-card{
+    background:rgba(255,255,255,.04);
+    border:1px solid rgba(255,255,255,.08);
+    border-radius:30px;
+    backdrop-filter:blur(20px);
+    padding:40px;
+}
+
+/* ===== 指标 ===== */
+
+.stats-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+    gap:24px;
+}
+
+.stat-card{
+    background:rgba(255,255,255,.04);
+    border:1px solid rgba(255,255,255,.08);
+    border-radius:24px;
+    padding:36px;
+    transition:.4s;
+}
+
+.stat-card:hover{
+    transform:translateY(-10px);
+    border-color:#f0b429;
+}
+
+.stat-label{
+    color:#9aa4bf;
+    margin-bottom:20px;
+}
+
+.stat-value{
+    font-size:58px;
+    font-weight:900;
+    color:#f0b429;
+}
+
+.stat-desc{
+    margin-top:12px;
+    color:#7180a0;
+}
+
+/* ===== chart ===== */
+
+.chart-box{
+    width:100%;
+    height:700px;
+}
+
+/* ===== story ===== */
+
+.story{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:60px;
+    align-items:center;
+}
+
+.story-text h3{
+    font-size:42px;
+    margin-bottom:24px;
+}
+
+.story-text p{
+    line-height:2;
+    color:#9aa4bf;
+}
+
+.highlight{
+    color:#f0b429;
+    font-weight:700;
+}
+
+/* ===== footer ===== */
+
+.footer{
+    padding:80px 20px;
+    text-align:center;
+    color:#7f8ba8;
+    border-top:1px solid rgba(255,255,255,.08);
+}
+
+/* ===== responsive ===== */
+
+@media(max-width:900px){
+
+    .hero h1{
+        font-size:48px;
+    }
+
+    .hero-number span{
+        font-size:70px;
+    }
+
+    .story{
+        grid-template-columns:1fr;
+    }
+
+    .section-title h2{
+        font-size:36px;
+    }
+
+    .chart-box{
+        height:500px;
+    }
+
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="bg-grid"></div>
+<div class="glow glow1"></div>
+<div class="glow glow2"></div>
+
+<!-- HERO -->
+
+<section class="hero">
+
+    <div class="hero-content">
+
+        <div class="hero-tag">
+            DATA REPORT · 2006—2024
+        </div>
+
+        <h1>
+            中国区域发展趋势
+            <br>
+            数据可视化报告
+        </h1>
+
+        <p>
+            基于31个省级行政区19年数据，
+            通过动态可视化方式，
+            探索中国区域发展格局与增长趋势。
+        </p>
+
+        <div class="hero-number">
+            <span>39.61</span>
+            <small>2024年全国最高值（河南）</small>
+        </div>
+
+        <button class="enter-btn"
+        onclick="document.getElementById('overview').scrollIntoView()">
+            开始浏览
+        </button>
+
+    </div>
+
+    <div class="scroll-tip">
+        SCROLL DOWN
+    </div>
+
+</section>
+
+<!-- 指标 -->
+
+<section id="overview">
+
+    <div class="section-title">
+        <h2>核心数据概览</h2>
+        <p>
+            从全国范围观察，
+            区域发展正在形成新的增长格局。
+        </p>
+    </div>
+
+    <div class="stats-grid">
+
+        <div class="stat-card">
+            <div class="stat-label">覆盖地区</div>
+            <div class="stat-value">31</div>
+            <div class="stat-desc">省级行政区</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-label">时间跨度</div>
+            <div class="stat-value">19</div>
+            <div class="stat-desc">年度数据</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-label">2024最高值</div>
+            <div class="stat-value">39.61</div>
+            <div class="stat-desc">河南省</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-label">增长最快区域</div>
+            <div class="stat-value">广东</div>
+            <div class="stat-desc">持续高速增长</div>
+        </div>
+
+    </div>
+
+</section>
+
+<!-- 地图 -->
+
+<section>
+
+    <div class="section-title">
+        <h2>全国区域热力分布</h2>
+        <p>
+            2024年各地区数据热力分布图，
+            东部沿海区域依旧保持领先优势。
+        </p>
+    </div>
+
+    <div class="glass-card">
+        <div id="mapChart" class="chart-box"></div>
+    </div>
+
+</section>
+
+<!-- Race Chart -->
+
+<section>
+
+    <div class="section-title">
+        <h2>区域排名动态变化</h2>
+        <p>
+            2006—2024 年间，
+            各地区排名发生显著变化。
+        </p>
+    </div>
+
+    <div class="glass-card">
+        <div id="raceChart" class="chart-box"></div>
+    </div>
+
+</section>
+
+<!-- Story -->
+
+<section>
+
+    <div class="story">
+
+        <div class="story-text">
+
+            <h3>
+                区域差距正在重新形成
+            </h3>
+
+            <p>
+                从整体趋势来看，
+                <span class="highlight">东部沿海地区</span>
+                依旧保持较强增长能力，
+                但中西部地区正在加速追赶。
+            </p>
+
+            <br>
+
+            <p>
+                河南、四川、广东等省份
+                在近十年呈现明显增长，
+                成为新的区域增长核心。
+            </p>
+
+        </div>
+
+        <div class="glass-card">
+            <div id="lineChart" class="chart-box"></div>
+        </div>
+
+    </div>
+
+</section>
+
+<!-- 雷达图 -->
+
+<section>
+
+    <div class="section-title">
+        <h2>区域综合能力对比</h2>
+        <p>
+            东部、中部、西部、东北地区
+            在增长结构上呈现明显差异。
+        </p>
+    </div>
+
+    <div class="glass-card">
+        <div id="radarChart" class="chart-box"></div>
+    </div>
+
+</section>
+
+<!-- Footer -->
+
+<div class="footer">
+    中国区域发展数据新闻可视化 · 2026
+</div>
+
+<script>
+
+/* =========================
+   数据
+========================= */
+
+const years = [
+2006,2007,2008,2009,2010,2011,
+2012,2013,2014,2015,2016,
+2017,2018,2019,2020,2021,
+2022,2023,2024
+];
+
+const regions = [
+["北京",14.34],
+["天津",9.56],
+["河北",25.68],
+["山西",14.73],
+["辽宁",20.19],
+["上海",11.05],
+["江苏",33.49],
+["浙江",19.38],
+["安徽",20.83],
+["福建",16.13],
+["江西",19.36],
+["山东",34.73],
+["河南",39.61],
+["湖北",27.45],
+["湖南",22.60],
+["广东",37.88],
+["广西",17.66],
+["重庆",15.22],
+["四川",30.90],
+["贵州",10.79],
+["云南",15.44],
+["陕西",21.55]
+];
+
+/* =========================
+   地图
+========================= */
+
+const mapChart = echarts.init(document.getElementById('mapChart'));
+
+mapChart.setOption({
+
+    backgroundColor:'transparent',
+
+    tooltip:{
+        trigger:'item'
+    },
+
+    visualMap:{
+        min:0,
+        max:40,
+        left:'left',
+        bottom:0,
+        text:['高','低'],
+        textStyle:{
+            color:'#fff'
+        },
+        inRange:{
+            color:[
+                '#163d7a',
+                '#1f78ff',
+                '#42a5f5',
+                '#f0b429',
+                '#ff6f00'
+            ]
+        }
+    },
+
+    series:[
+        {
+            name:'数据值',
+            type:'map',
+            map:'china',
+            roam:true,
+
+            emphasis:{
+                label:{
+                    color:'#fff'
+                },
+                itemStyle:{
+                    areaColor:'#f0b429'
+                }
+            },
+
+            data:regions.map(r=>({
+                name:r[0],
+                value:r[1]
+            }))
+        }
+    ]
+});
+
+/* =========================
+   折线图
+========================= */
+
+const lineChart = echarts.init(document.getElementById('lineChart'));
+
+lineChart.setOption({
+
+    backgroundColor:'transparent',
+
+    tooltip:{
+        trigger:'axis'
+    },
+
+    legend:{
+        textStyle:{
+            color:'#fff'
+        }
+    },
+
+    xAxis:{
+        type:'category',
+        boundaryGap:false,
+        data:years,
+        axisLabel:{
+            color:'#9aa4bf'
+        }
+    },
+
+    yAxis:{
+        type:'value',
+        axisLabel:{
+            color:'#9aa4bf'
+        },
+        splitLine:{
+            lineStyle:{
+                color:'rgba(255,255,255,.08)'
+            }
+        }
+    },
+
+    series:[
+        {
+            name:'河南',
+            type:'line',
+            smooth:true,
+            data:[9.95,11.5,13.08,13.86,15.5,17.03,26.08,20.96,22.59,24.87,25.94,26.76,28.33,30.84,31.14,34.65,35.43,37.98,39.61]
+        },
+        {
+            name:'广东',
+            type:'line',
+            smooth:true,
+            data:[9.43,12.36,13.93,15.85,16.85,18.71,21.92,21.79,23.26,24.4,25.75,26.76,28.07,28.53,29.43,32.9,34.23,36.45,37.88]
+        },
+        {
+            name:'江苏',
+            type:'line',
+            smooth:true,
+            data:[15.46,17.16,19.38,20.66,23.25,23.94,24.11,25.21,25.64,25.55,26.46,27.38,28.03,29.21,29.29,31.24,31.74,32.35,33.49]
+        }
+    ]
+});
+
+/* =========================
+   雷达图
+========================= */
+
+const radarChart = echarts.init(document.getElementById('radarChart'));
+
+radarChart.setOption({
+
+    backgroundColor:'transparent',
+
+    legend:{
+        textStyle:{
+            color:'#fff'
+        }
+    },
+
+    radar:{
+        indicator:[
+            {name:'增长速度',max:100},
+            {name:'区域规模',max:100},
+            {name:'稳定性',max:100},
+            {name:'潜力',max:100},
+            {name:'持续性',max:100}
+        ],
+        axisName:{
+            color:'#fff'
+        }
+    },
+
+    series:[
+        {
+            type:'radar',
+
+            data:[
+                {
+                    value:[90,95,88,85,92],
+                    name:'东部'
+                },
+                {
+                    value:[78,75,70,82,76],
+                    name:'中部'
+                },
+                {
+                    value:[68,65,60,80,72],
+                    name:'西部'
+                }
+            ]
+        }
+    ]
+});
+
+/* =========================
+   Race Bar
+========================= */
+
+const raceChart = echarts.init(document.getElementById('raceChart'));
+
+const raceData = [
+['河南',39.61],
+['广东',37.88],
+['山东',34.73],
+['江苏',33.49],
+['四川',30.90],
+['湖北',27.45],
+['河北',25.68],
+['湖南',22.60]
+];
+
+raceChart.setOption({
+
+    backgroundColor:'transparent',
+
+    grid:{
+        top:30,
+        left:120,
+        right:50,
+        bottom:30
+    },
+
+    xAxis:{
+        max:40,
+        axisLabel:{
+            color:'#9aa4bf'
+        },
+        splitLine:{
+            lineStyle:{
+                color:'rgba(255,255,255,.08)'
+            }
+        }
+    },
+
+    yAxis:{
+        type:'category',
+        inverse:true,
+        axisLabel:{
+            color:'#fff',
+            fontSize:16
+        },
+        data:raceData.map(d=>d[0])
+    },
+
+    series:[
+        {
+            realtimeSort:true,
+            type:'bar',
+            data:raceData.map(d=>d[1]),
+            label:{
+                show:true,
+                position:'right',
+                color:'#fff'
+            },
+            itemStyle:{
+                borderRadius:[0,12,12,0],
+                color:new echarts.graphic.LinearGradient(
+                    0,0,1,0,
+                    [
+                        {offset:0,color:'#f0b429'},
+                        {offset:1,color:'#ff6f00'}
+                    ]
+                )
+            }
+        }
+    ],
+
+    animationDuration:2000,
+    animationDurationUpdate:2000,
+    animationEasing:'linear',
+    animationEasingUpdate:'linear'
+
+});
+
+/* =========================
+   resize
+========================= */
+
+window.addEventListener('resize',()=>{
+
+    mapChart.resize();
+    lineChart.resize();
+    radarChart.resize();
+    raceChart.resize();
+
+});
+
+</script>
+
+</body>
+</html>
+```
